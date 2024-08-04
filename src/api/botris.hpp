@@ -1,9 +1,10 @@
 #pragma once
+#include <concepts>
 #include <cstdlib>
 #include <iostream>
 #include <string>
 
-#include "./json.hpp"
+#include "json.hpp"
 
 #ifdef _WIN32
 #include <IXNetSystem.h>
@@ -43,7 +44,13 @@ const Secrets get_secrets() {
     return SECRETS;
 }
 
-bool wss_connect(Secrets SECRETS) {
+template <typename T>
+concept ActionHandler = requires (T t, const nlohmann::json& obj) {
+    {t(obj)} -> std::same_as<void>;
+};
+
+template <ActionHandler RequestMoveHandler>
+bool start(Secrets SECRETS, RequestMoveHandler moveHandler) {
 #ifdef _WIN32
     //! Required on Windows
     ix::initNetSystem();
@@ -58,18 +65,8 @@ bool wss_connect(Secrets SECRETS) {
             nlohmann::json message = nlohmann::json::parse(msg->str);
             std::cout << "received message: " << msg->str << std::endl;
 
-            if (message["type"].dump() == "\"request_move\"") {
-                nlohmann::json action;
-                action["type"] = "action";
-
-                nlohmann::json commands = nlohmann::json::array();
-
-                commands.push_back("sonic_drop");
-
-                action["payload"] = commands;
-
-                // webSocket.send("{type:'action'; payload: {commands: ['sonic_drop']}}");
-                webSocket.send(action.dump());
+            if (message["type"] == "request_move") {
+                moveHandler(message);
             }
 
         } else if (msg->type == ix::WebSocketMessageType::Open) {
