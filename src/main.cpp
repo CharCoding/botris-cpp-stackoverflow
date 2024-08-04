@@ -2,12 +2,21 @@
 #include "botris.hpp"
 
 int main() {
-    auto secrets = botris::get_secrets();
+  auto secrets = botris::get_secrets();
 
-    botris::wss_connect(secrets);
+  botris::wss_connect(secrets);
 
-    int s;
-    std::cin >> s;
+  int s;
+  std::cin >> s;
 
-    return 0;
+  botris::webSocket.send(
+      "{"
+      "\"type\": \"action\","
+      "\"payload\": {"
+      "\"commands\":"
+      "[ \"sonic_drop\", \"sonic_drop\", \"sonic_drop\" ]"
+      "}"
+      "}");
+
+  return 0;
 }
