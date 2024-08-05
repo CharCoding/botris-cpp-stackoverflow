@@ -63,11 +63,26 @@ constexpr int8_t pieces[7][32] = {
 // have you seen https://tetris.wiki/Super_Rotation_System
 // I'm copying from https://github.com/newclarityex/libtris/blob/main/src/utils.ts
 // ohh
-constexpr int8_t wallkicks[] = {1, 0, 1, -1, 0, 2, 1, 2};
+constexpr int8_t wallkicks[64] = {
+   1, 0, 1,-1, 0, 2, 1, 2,
+  -1, 0,-1, 1, 0,-2,-1,-2,
+   1, 0, 1,-1, 0, 2, 1, 2,
+   1, 0, 1, 1, 0,-2, 1,-2,
+  -1, 0,-1,-1, 0, 2,-1, 2,
+  -1, 0,-1, 1, 0,-2,-1,-2,
+  -1, 0,-1,-1, 0, 2,-1, 2,
+   1, 0, 1, 1, 0,-2, 1,-2
+};
 
-constexpr int8_t i_wallkicks[][8] = {
-  {-2, 0, 1, 0, -2, -1, 1, 2},
-  {-1, 0, 2, 0, -1, 2, 2, -1}
+constexpr int8_t i_wallkicks[64] = {
+   2, 0,-1, 0, 2, 1,-1,-2,
+  -2, 0, 1, 0,-2,-1, 1, 2,
+  -1, 0, 2, 0,-1, 2, 2,-1,
+  -1, 0, 2, 0,-1, 2, 2,-1,
+   1, 0,-2, 0, 1,-2,-2, 1,
+   1, 0,-2, 0, 1,-2,-2, 1,
+  -2, 0, 1, 0,-2,-1, 1, 2,
+   2, 0,-1, 0, 2, 1,-1,-2
 };
 
 using Board = uint8_t[20][10];
@@ -88,53 +103,21 @@ typedef struct pieceData {
   int x;
   int y;
 } pieceData;
-bool check_piece_collision(Board board, pieceData p);
-/**
- * Check if piece p can be rotated to new rotation r (decide: should r be new rotation state or rotation direction?)
- * on success, new pieceData is returned, with p.rot == r
- * on failure, p is returned as is, with p.rot != r
- */
-pieceData spin(Board board, pieceData p, Rotation r) {
-  pieceData rotated = p;
-  rotated.rot = r;
-  /*
-  0 -> 8 & 16 -> 8: -x +y
-  
-  */
-  if(p.piece == Piece::PIECE_I) {
-   
-  } else { // please do not rotate an O piece
-    if(check_piece_collision(board, rotated)) {
-      return rotated;
-    }
-    for(int i = 0; i < 8; i += 2) {
-      rotated.x = p.x + wallkicks[i];
-      rotated.y = p.y + wallkicks[i + 1];
-      if(check_piece_collision(board, rotated)) {
-        return rotated;
-      }
-    }
-  }
-  return p;
-}
 
-struct Coord {
-  int x;
-  int y;
-};
 /**
  * Check if piece collides with any minos on the board, or is out of bounds.
  * Returns true if can be placed at current position without oob or collisions, false otherwise.
  */
-bool check_piece_collision(Board board, pieceData p) {
-  Coord positions[4] {
-    Coord {p.x + pieces[p.piece][p.rot], p.y + pieces[p.piece][p.rot]},
-    Coord {p.x + pieces[p.piece][p.rot + 1], p.y + pieces[p.piece][p.rot + 2]},
-    Coord {p.x + pieces[p.piece][p.rot + 3], p.y + pieces[p.piece][p.rot + 4]},
-    Coord {p.x + pieces[p.piece][p.rot + 5], p.y + pieces[p.piece][p.rot + 6]},
-  };
-  for (Coord c : positions) {
-    if (c.x < 0 || c.x > 10 || c.y < 0 || board[c.y][c.x]) {
+constexpr bool check_piece_placeable(const Board board, const pieceData p) { // @danlliu should we use references for const Board?
+  int x = p.x + pieces[p.piece][p.rot];
+  int y = p.y + pieces[p.piece][p.rot];
+  if(x < 0 || x > 10 || y < 0 || board[y][x]) {
+    return false;
+  }
+  for(int i = 1; i < 7; ++i) {
+    x = p.x + pieces[p.piece][p.rot + i];
+    y = p.y + pieces[p.piece][p.rot + ++i];
+    if(x < 0 || x > 10 || y < 0 || board[y][x]) {
       return false;
     }
   }
@@ -142,35 +125,94 @@ bool check_piece_collision(Board board, pieceData p) {
 }
 
 /**
- * Check if a piece cannot move in any direction (including upwards), which indicates it satisfies an all-spin
+ * Check if piece p can be rotated to new rotation r (decide: should r be new rotation state or rotation direction?)
+ * on success, new pieceData is returned, with p.rot == r
+ * on failure, p is returned as is, with p.rot != r
  */
-bool check_piece_immobile(Board board, pieceData p) {
-  p.x++;
-  if(check_piece_collision(board, p)) {
-    return false;
+constexpr pieceData spin(const Board board, const pieceData p, const Rotation r) {
+  pieceData rotated = p;
+  rotated.rot = r;
+  if(p.piece == Piece::PIECE_O) {
+    return rotated;
   }
-  p.x -= 2;
-  if(check_piece_collision(board, p)) {
-    return false;
+  if(check_piece_placeable(board, rotated)) {
+    return rotated;
+  } // This is not convoluted at all...
+  const int8_t* const offsets = ((p.piece == Piece::PIECE_I) ? i_wallkicks : wallkicks) + ((p.rot & 16) << 1 | r);
+  for(int i = 0; i < 8; ++i) {
+    rotated.x = p.x + offsets[i];
+    rotated.y = p.y + offsets[++i];
+    if(check_piece_placeable(board, rotated)) {
+      return rotated;
+    }
   }
-  p.x++;
+  return p;
+}
+
+/**
+ * Check if a piece cannot move in any direction (including upwards), which indicates it satisfies an all-spin
+ * Checking for upwards (+y) first since it is most likely to return
+ */
+constexpr bool check_piece_immobile(const Board board, pieceData p) {
   p.y++;
-  if(check_piece_collision(board, p)) {
+  if(check_piece_placeable(board, p)) {
     return false;
   }
   p.y -= 2;
-  if(check_piece_collision(board, p)) {
+  if(check_piece_placeable(board, p)) {
+    return false;
+  }
+  p.y++;
+  p.x++;
+  if(check_piece_placeable(board, p)) {
+    return false;
+  }
+  p.x -= 2;
+  if(check_piece_placeable(board, p)) {
     return false;
   }
   return true;
 }
 
-// For testing; note y is subtracted from coordinate due to y increase downward in the terminal, and x is doubled to print []
-void print_piece(Piece p, Rotation r, int row, int col) {
-  // piece[p][r] is the rotation center; I and O pieces should work the same
-  //                                   Y                       X
-  printf("\033[%d;%dH[]", col - pieces[p][r    ], row + pieces[p][r    ] * 2);
-  printf("\033[%d;%dH[]", col - pieces[p][r | 2], row + pieces[p][r | 1] * 2);
-  printf("\033[%d;%dH[]", col - pieces[p][r | 4], row + pieces[p][r | 3] * 2);
-  printf("\033[%d;%dH[]", col - pieces[p][r | 6], row + pieces[p][r | 5] * 2);
+/**
+ * Clear lines of the board, starting from the bottom and working upwards, mutating board
+ * Returns the number of lines cleared
+ * (Not tested! could be buggy)
+ */
+int clear_lines(Board board) {
+  int delta = 0;
+  for(int i = 0; i < 20; ++i) {
+    bool filled = true;
+    for(int j = 0; j < 10; ++j) {
+      if(board[i][j] == 0) {
+        filled = false;
+        break;
+      }
+    }
+    if(filled) {
+      ++delta;
+    } else if(delta) {
+      for(int j = 0; j < 10; ++j) {
+        board[i - delta][j] = board[i][j];
+      }
+    }
+  }
+  for(int i = 20 - delta; i < 20; ++i) { // can optimize here if we know the board's max height
+    for(int j = 0; j < 10; ++j) {
+      board[i][j] = 0;
+    }
+  }
+  return delta;
+}
+
+/**
+ * Place piece p on board, mutating board (discuss: should we return a new board copy isntead?)
+ */
+void place_piece(Board board, const pieceData p) {
+  // check if piece can be placed?
+  board[p.y + pieces[p.piece][p.rot]][p.x + pieces[p.piece][p.rot]] = 1;
+  for(int i = 1; i < 7; ++i) {
+    board[p.y + pieces[p.piece][p.rot + i]][p.x + pieces[p.piece][p.rot + ++i]] = 1;
+  }
+  clear_lines(board); // should this always be done?
 }
