@@ -29,3 +29,7 @@ add_executable(main ${main_sources})
 
 target_link_libraries(main PRIVATE ixwebsocket::ixwebsocket)
 include_directories(src/include)
+
+include(CTest)
+add_executable(TestBoard "src/tests/TestBoard.cpp")
+add_test(NAME TestBoard COMMAND TestBoard)
