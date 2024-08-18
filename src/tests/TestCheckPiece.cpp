@@ -244,8 +244,200 @@ void test_i() {
   assert(!check_piece_placeable(b, p));
 }
 
+void washing_machine() {
+  Board b = {
+      {0, 0, 0, 1, 1, 1, 1, 1, 1, 1},  // 0
+      {0, 1, 0, 1, 1, 1, 1, 1, 1, 1},  // 1
+      {0, 0, 0, 1, 1, 1, 1, 1, 1, 1},  // 2
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 3
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 4
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 5
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 6
+  };
+  pieceData p;
+  p.piece = PIECE_J;
+  p.rot = ROTATE_0;
+  p.x = 0;
+  p.y = 0;
+
+  assert(!check_piece_placeable(b, p));
+  p.x = 1;
+  assert(check_piece_placeable(b, p));
+  p.y = 1;
+  assert(!check_piece_placeable(b, p));
+  p.y = 2;
+  assert(!check_piece_placeable(b, p));
+
+  p.rot = ROTATE_90;
+  p.x = 0;
+  p.y = 0;
+  assert(!check_piece_placeable(b, p));
+  p.y = 1;
+  assert(check_piece_placeable(b, p));
+  p.x = 1;
+  assert(!check_piece_placeable(b, p));
+  p.x = 2;
+  assert(!check_piece_placeable(b, p));
+
+  p.rot = ROTATE_180;
+  p.x = 2;
+  p.y = 2;
+  assert(!check_piece_placeable(b, p));
+  p.x = 1;
+  assert(check_piece_placeable(b, p));
+  p.y = 1;
+  assert(!check_piece_placeable(b, p));
+  p.y = 0;
+  assert(!check_piece_placeable(b, p));
+
+  p.rot = ROTATE_270;
+  p.x = 2;
+  p.y = 0;
+  assert(!check_piece_placeable(b, p));
+  p.y = 1;
+  assert(check_piece_placeable(b, p));
+  p.x = 3;
+  assert(!check_piece_placeable(b, p));
+  p.x = 1;
+  assert(!check_piece_placeable(b, p));
+  p.x = 0;
+  assert(!check_piece_placeable(b, p));
+
+  p.piece = PIECE_L;
+  p.rot = ROTATE_0;
+  p.x = 0;
+  p.y = 0;
+  assert(!check_piece_placeable(b, p));
+  p.x = 1;
+  assert(check_piece_placeable(b, p));
+  p.y = 1;
+  assert(!check_piece_placeable(b, p));
+  p.y = 2;
+  assert(!check_piece_placeable(b, p));
+  p.y = 0;
+  p.x = 2;
+  assert(!check_piece_placeable(b, p));
+
+  p.rot = ROTATE_90;
+  p.x = 0;
+  p.y = 0;
+  assert(!check_piece_placeable(b, p));
+  p.y = 1;
+  assert(check_piece_placeable(b, p));
+  p.x = -1;
+  assert(!check_piece_placeable(b, p));
+  p.x = 0;
+  p.y = 2;
+  assert(!check_piece_placeable(b, p));
+  p.x = 1;
+  assert(!check_piece_placeable(b, p));
+  p.x = 2;
+  assert(!check_piece_placeable(b, p));
+
+  p.rot = ROTATE_180;
+  p.x = 0;
+  p.y = 2;
+  assert(!check_piece_placeable(b, p));
+  p.x = 1;
+  assert(check_piece_placeable(b, p));
+  p.x = 2;
+  assert(!check_piece_placeable(b, p));
+  p.x = 1;
+  p.y = 3;
+  assert(!check_piece_placeable(b, p));
+  p.y = 1;
+  assert(!check_piece_placeable(b, p));
+  p.y = 0;
+  assert(!check_piece_placeable(b, p));
+
+  p.rot = ROTATE_270;
+  p.x = 2;
+  p.y = 1;
+  assert(check_piece_placeable(b, p));
+  p.x = 3;
+  assert(!check_piece_placeable(b, p));
+  p.x = 1;
+  assert(!check_piece_placeable(b, p));
+  p.x = 2;
+  p.y = 2;
+  assert(!check_piece_placeable(b, p));
+  p.y = 0;
+  assert(!check_piece_placeable(b, p));
+}
+
+void test_jl() {
+  pieceData j;
+  j.piece = PIECE_J;
+  pieceData l;
+  l.piece = PIECE_L;
+  Board j_holes = {
+      {0, 0, 0, 1, 1, 1, 1, 1, 0, 0},  // 0
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},  // 1
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 0},  // 2
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 3
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 4
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},  // 5
+      {0, 0, 1, 1, 1, 1, 1, 0, 0, 0},  // 6
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 7
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 8
+  };
+  Board l_holes = {
+      {0, 0, 1, 1, 1, 1, 1, 0, 0, 0},  // 0
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},  // 1
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 2
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 3
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 0},  // 4
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 0},  // 5
+      {0, 0, 0, 1, 1, 1, 1, 1, 0, 0},  // 6
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 7
+      {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 8
+  };
+
+  j.rot = l.rot = ROTATE_0;
+  j.y = l.y = 0;
+  j.x = l.x = 1;
+  assert(check_piece_placeable(j_holes, j));
+  assert(!check_piece_placeable(j_holes, l));
+
+  j.x = l.x = 8;
+  assert(!check_piece_placeable(l_holes, j));
+  assert(check_piece_placeable(l_holes, l));
+
+  j.rot = l.rot = ROTATE_90;
+  j.x = l.x = 0;
+  j.y = l.y = 5;
+  assert(check_piece_placeable(j_holes, j));
+  assert(!check_piece_placeable(j_holes, l));
+
+  j.y = l.y = 1;
+  assert(!check_piece_placeable(l_holes, j));
+  assert(check_piece_placeable(l_holes, l));
+
+  j.rot = l.rot = ROTATE_180;
+  j.x = l.x = 8;
+  j.y = l.y = 6;
+  assert(check_piece_placeable(j_holes, j));
+  assert(!check_piece_placeable(j_holes, l));
+
+  j.x = l.x = 1;
+  assert(!check_piece_placeable(l_holes, j));
+  assert(check_piece_placeable(l_holes, l));
+
+  j.rot = l.rot = ROTATE_270;
+  j.x = l.x = 9;
+  j.y = l.y = 1;
+  assert(check_piece_placeable(j_holes, j));
+  assert(!check_piece_placeable(j_holes, l));
+
+  j.y = l.y = 5;
+  assert(!check_piece_placeable(l_holes, j));
+  assert(check_piece_placeable(l_holes, l));
+}
+
 int main() {
   test_o();
   test_i();
+  washing_machine();
+  test_jl();
   return 0;
 }
