@@ -111,7 +111,7 @@ typedef struct pieceData {
 constexpr bool check_piece_placeable(const Board board, const pieceData p) { // @danlliu should we use references for const Board?
   int x = p.x + pieces[p.piece][p.rot];
   int y = p.y + pieces[p.piece][p.rot];
-  if(x < 0 || x > 10 || y < 0 || board[y][x]) {
+  if(x < 0 || x > 9 || y < 0 || board[y][x]) {
     return false;
   }
   for(int i = 1; i < 7; ++i) {
