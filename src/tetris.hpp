@@ -117,7 +117,7 @@ constexpr bool check_piece_placeable(const Board board, const pieceData p) { // 
   for(int i = 1; i < 7; ++i) {
     x = p.x + pieces[p.piece][p.rot + i];
     y = p.y + pieces[p.piece][p.rot + ++i];
-    if(x < 0 || x > 10 || y < 0 || board[y][x]) {
+    if(x < 0 || x > 9 || y < 0 || board[y][x]) {
       return false;
     }
   }
