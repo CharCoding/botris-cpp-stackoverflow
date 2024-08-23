@@ -32,12 +32,16 @@ set(main_sources
     # this is where you put the rest of your sources
 )
 
-set(test_sources
-    "src/test.cpp"
-)
 
 add_executable(main ${main_sources})
-add_executable(test ${test_sources})
 
 target_link_libraries(main PRIVATE ixwebsocket::ixwebsocket)
 include_directories(src/include)
+
+include(CTest)
+add_executable(TestPrintPiece "src/tests/TestPrintPiece.cpp")
+add_test(NAME TestPrintPiece COMMAND TestPrintPiece)
+# add_executable(TestClearLines "src/tests/TestClearLines.cpp")
+# add_test(NAME TestClearLines COMMAND TestClearLines)
+# add_executable(TestCheckPiece "src/tests/TestCheckPiece.cpp")
+# add_test(NAME TestCheckPiece COMMAND TestCheckPiece)

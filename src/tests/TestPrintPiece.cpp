@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <vector>
 
-#include "tetris.hpp"
+#include "../tetris.hpp"
 
 void print_board(const Board board) {
   puts("+--------------------+");
