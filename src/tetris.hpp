@@ -145,8 +145,6 @@ struct BoardStats {
 
 using Board = int[10];
 
-Board board = {0};
-
 #define get_column(b, x) (b)[(x)]
 constexpr inline bool get(const Board board, int8_t x, int8_t y) { // 1 = filled, 0 = empty
   return board[x] >> y & 1;
@@ -166,8 +164,6 @@ inline void set(Board board, int8_t x, int8_t y) {
 inline void clear(Board board, int8_t x, int8_t y) {
   board[x] &= ~(1 << y);
 }
-
-
 
 // do we want to do a top-left piece position scheme if we're copying from nuke's code
 // or does it not matter
@@ -193,7 +189,7 @@ constexpr bool check_piece_placeable(const Board board, const PieceData p) { // 
   for(int i = 0; i < 4; ++i) {
     const int8_t x = p.x + piece_offsets[p.piece][p.rot][i].x;
     const int8_t y = p.y + piece_offsets[p.piece][p.rot][i].y;
-    if(x < 0 || x > 10 || y < 0 || get(board, x, y)) {
+    if(x < 0 || x > 9 || y < 0 || get(board, x, y)) {
       return false;
     }
   }

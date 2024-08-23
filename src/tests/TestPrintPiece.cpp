@@ -1,20 +1,7 @@
 #include <cstdio>
 #include <vector>
 
-#include "../tetris.hpp"
-
-void print_board(const Board board) {
-  puts("+--------------------+");
-  for(int i = 20; i--;) {
-    putchar_unlocked('|');
-    for(int j = 0; j < 10; ++j) {
-      printf(get(board, j, i) ? "[]" : "  ");
-    }
-    putchar_unlocked('|');
-    putchar_unlocked('\n');
-  }
-  puts("+--------------------+");
-}
+#include "utils.hpp"
 
 // note y is subtracted from coordinate due to y increase downward in the terminal, and x is doubled to print []
 void print_piece(Piece p, Rotation r, int row, int col) {
