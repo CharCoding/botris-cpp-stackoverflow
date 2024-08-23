@@ -1,5 +1,5 @@
-# Botris-cpp-template
-Template for setting up ixwebsocket and cmake for easily making your botris bot!
+# Botris-cpp-stackoverflow
+A botris bot to overflow your stack
 
 # dependencies
     - OpenSSL (libssl-dev on debian!)

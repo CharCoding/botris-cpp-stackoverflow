@@ -24,7 +24,7 @@ struct GameState {
   std::array<Piece, 6> queue;
   std::vector<unsigned> garbage;
   std::optional<Piece> held;
-  pieceData current;
+  PieceData current;
   unsigned combo;
   unsigned score;
   unsigned pieces;
@@ -54,6 +54,7 @@ constexpr const char *moveToString(Move move) {
   case Move::InfDrop:
     return "sonic_drop";
   }
+  __builtin_unreachable();
 }
 
 inline void sendMove(const std::span<Move> &moves) {
@@ -91,14 +92,14 @@ inline GameState parseGameState(const nlohmann::json &gameState) {
     }
   };
 
-  { // board
+  { // board // there's a better way now since board is stored by column now
     for (auto r = 0; r < 20; ++r) {
       for (auto c = 0; c < 10; ++c) {
         auto block = gameState["board"][r][c];
         if (block.is_null())
-          result.board[r][c] = 0;
+          clear(result.board, c, r);
         else
-          result.board[r][c] = 1;
+          set(result.board, c, r);
       }
     }
   }
