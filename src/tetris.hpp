@@ -2,6 +2,17 @@
 #include <cstdint>
 #include <vector>
 #include <immintrin.h>
+#include <bit>
+
+template<typename T>
+constexpr T rotl(T x, int8_t r) {
+  return (x << r) | (x >> (sizeof(T) * 8 - r));
+}
+
+template<typename T>
+constexpr T rotr(T x, int8_t r) {
+  return (x >> r) | (x << (sizeof(T) * 8 - r));
+}
 
 enum Rotation: int8_t {
   ROTATE_0 = 0,
@@ -43,7 +54,7 @@ constexpr int parity(Piece p) {
   return p == Piece::PIECE_T;
 }
 
-constexpr int column_parity(Piece p, Rotation r, int x, int y) {
+constexpr int column_parity(Piece p, Rotation r) {
   return (int)p >= 5 || (p == Piece::PIECE_T && ((int)r & 8));
 }
 /*
@@ -165,6 +176,14 @@ inline void clear(Board board, int8_t x, int8_t y) {
   board[x] &= ~(1 << y);
 }
 
+constexpr inline int height(const Board board) {
+  int column = board[0];
+  for(int i = 9; i; --i) {
+    column |= board[i];
+  }
+  return 32 - std::countl_zero((unsigned)column);
+}
+
 // do we want to do a top-left piece position scheme if we're copying from nuke's code
 // or does it not matter
 // (i still don't completely get the piece scheme you documented up there)
@@ -275,10 +294,10 @@ int tank_garbage(Board board, const std::vector<unsigned> columns) {
   for(int i = 10; i--;) { // shld
     board[i] = board[i] << delta | -1U >> (32 - delta);
   }
-  unsigned mask = -2; // for each row, clear a single column by anding with mask (all 1's except one), then move up by rotl
+  unsigned mask = 1; // starting from row 0, xor out an empty cell on the corresponding column
   for(int i = delta; i--;) { // this is probably faster than first converting garbage vector to (column, height)
-    board[columns[i]] &= mask;
-    mask = mask << 1 | mask >> 31;
+    board[columns[i]] ^= mask;
+    mask += mask;
   } // ok this may be slightly cursed
   return delta;
 }

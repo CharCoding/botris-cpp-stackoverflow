@@ -8,7 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Add BMI2 flag for compilers that support it
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-    add_compile_options(-mbmi2)
+    add_compile_options(-mbmi2 -mlzcnt)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     add_compile_options(/arch:AVX2)  # MSVC uses a different flag
 endif()
@@ -45,3 +45,5 @@ add_executable(TestClearLines "src/tests/TestClearLines.cpp")
 add_test(NAME TestClearLines COMMAND TestClearLines)
 add_executable(TestCheckPiece "src/tests/TestCheckPiece.cpp")
 add_test(NAME TestCheckPiece COMMAND TestCheckPiece)
+add_executable(TestMoveGen "src/tests/TestMoveGen.cpp")
+add_test(NAME TestMoveGen COMMAND TestMoveGen)

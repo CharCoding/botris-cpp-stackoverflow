@@ -58,6 +58,7 @@ constexpr const char *moveToString(Move move) {
 }
 
 inline void sendMove(const std::span<Move> &moves) {
+  //*
   auto cmd = nlohmann::json::array();
   for (auto m : moves) {
     cmd.push_back(moveToString(m));
@@ -66,6 +67,12 @@ inline void sendMove(const std::span<Move> &moves) {
       {{"type", "action"},
        {"payload", nlohmann::json::object({{"commands", cmd}})}});
   webSocket.send(data.dump());
+  /*/ std::string payload = "{\"type\":\"action\",\"payload\":{\"commands\":[\"" + moveToString(moves[0]);
+  for (auto m : moves.subspan(1)) {
+    payload += "\",\"";
+    payload += moveToString(m);
+  }
+  webSocket.send(payload + "\"]}}"); //*/
 }
 
 inline GameState parseGameState(const nlohmann::json &gameState) {
@@ -90,6 +97,7 @@ inline GameState parseGameState(const nlohmann::json &gameState) {
     default:
       assert(false);
     }
+    __builtin_unreachable();
   };
 
   { // board // there's a better way now since board is stored by column now
@@ -140,5 +148,8 @@ inline GameState parseGameState(const nlohmann::json &gameState) {
   }
   return result;
 }
+
+std::vector<PieceData> find_moves(const Board board, const Piece current);
+std::vector<PieceData> find_moves_fast(const Board board, const Piece current);
 
 } // namespace botris::api

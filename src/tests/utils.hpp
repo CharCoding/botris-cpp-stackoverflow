@@ -24,6 +24,10 @@ void print_board(const Board board) {
   puts("+--------------------+");
 }
 
+void print_piece(const PieceData p) {
+  printf("%c%c(%d,%d)", piece_letters[p.piece], "NESW"[p.rot], p.x, p.y);
+}
+
 void assertLinesCleared(int linesCleared, int expected) {
   if (linesCleared != expected) {
     std::cerr << "Clearing full board should clear " << expected
@@ -33,7 +37,7 @@ void assertLinesCleared(int linesCleared, int expected) {
   }
 }
 
-void assertBoardsEqual(const Board RESTRICT left, const Board RESTRICT right) {
+void assertBoardsEqual(const Board left, const Board right) {
   for(int i = 10; i--;) {
     if(left[i] != right[i]) {
       std::cerr << "Assertion failed: boards not equal\n";
@@ -42,11 +46,11 @@ void assertBoardsEqual(const Board RESTRICT left, const Board RESTRICT right) {
       for(int i = 20; i--;) {
         std::cerr << '|';
         for(int j = 0; j < 10; ++j) {
-          std::cerr << get(left, j, i) ? "[]" : "  ";
+          std::cerr << (get(left, j, i) ? "[]" : "  ");
         }
         std::cerr << "| |";
         for(int j = 0; j < 10; ++j) {
-          std::cerr << get(right, j, i) ? "[]" : "  ";
+          std::cerr << (get(right, j, i) ? "[]" : "  ");
         }
         std::cerr << "|\n";
       }
